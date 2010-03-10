@@ -61,14 +61,9 @@ install lib/* $RPM_BUILD_ROOT%{_libdir}/v8cgi/
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%post	libs -p /sbin/ldconfig
-%postun	libs -p /sbin/ldconfig
-
 %files
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/v8cgi
 %dir %{_libdir}/v8cgi
 %attr(755,root,root) %{_libdir}/v8cgi/*.so
 %{_libdir}/v8cgi/*.js
-
-%files libs
