@@ -18,6 +18,7 @@ URL:		http://code.google.com/p/v8cgi
 Source0:	%{name}-%{svnrev}.tar.bz2
 # Source0-md5:	5578247aebd00b5c8a08b0c8b5e3459d
 Source1:	%{name}.conf
+Patch0:	%{name}-pgsql.patch
 BuildRequires:	fcgi-devel
 %if "%{pld_release}" == "ac"
 BuildRequires:	gcc >= 5:4.0
@@ -25,6 +26,7 @@ BuildRequires:	gcc >= 5:4.0
 BuildRequires:	gcc >= 6:4.0
 %endif
 BuildRequires:	libstdc++-devel
+BuildRequires:	postgresql-devel
 BuildRequires:	scons
 BuildRequires:	v8-devel
 ExclusiveArch:	%{ix86} %{x8664} arm
@@ -48,6 +50,9 @@ Support for v8cgi within Apache.
 
 %prep
 %setup -q -n %{name}
+%if "%{pld_release}" == "ac"
+%patch0 -p1
+%endif
 
 %build
 # build library
@@ -67,7 +72,8 @@ export CFLAGS LDFLAGS CXXFLAGS CC CXX
 	cpppath="$(pkg-config --variable=includedir apr-1);$(pkg-config --variable=includedir apr-util-1);%{_includedir}/fastcgi" \
 	sockets=1 \
 	fcgi=1 \
-	mysql=1
+	mysql=1 \
+	pgsql=1
 
 %install
 rm -rf $RPM_BUILD_ROOT

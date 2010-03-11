@@ -1,0 +1,92 @@
+diff -ur v8cgi-/src/lib/pgsql/pgsql.cc v8cgi/src/lib/pgsql/pgsql.cc
+--- v8cgi-/src/lib/pgsql/pgsql.cc	2010-03-10 22:55:21.000000000 -0700
++++ v8cgi/src/lib/pgsql/pgsql.cc	2010-03-10 22:57:44.000000000 -0700
+@@ -35,9 +35,6 @@
+   #include <pthread.h>
+ 
+   namespace pq {
+-#ifndef windows
+-    #include <postgres_fe.h>
+-#endif
+     #include <libpq-fe.h>
+     #include <libpq/libpq-fs.h>
+   }
+@@ -727,7 +724,7 @@
+   JS_METHOD(_reset) {
+ 	v8::HandleScope scope;
+ 	PGSQL_RES_SETPOS(0);
+-	return JS_BOOL(TRUE);
++	return JS_BOOL(true);
+   }
+ 
+ JS_METHOD(_execute) {
+@@ -954,11 +951,13 @@
+ 	  return (void)pq::PQsetClientEncoding(conn,*v8::String::Utf8Value(value->ToString()));
+   }
+ 
++#if 0
+   v8::Handle<v8::Value> get_client_encoding(v8::Local<v8::String> name, const v8::AccessorInfo& args) {
+ 	PGSQL_PTR_CON;
+ 	ASSERT_CONNECTED;
+ 	return JS_STR(pq::pg_encoding_to_char(pq::PQclientEncoding(conn)));
+   }
++#endif
+ 
+   void set_error_verbosity(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& args) {
+ 	v8::HandleScope scope;
+@@ -1026,7 +1025,7 @@
+     }
+     else
+       args->ret = JS_ERROR(std::string("[js_pgsql.cc @ _asyncquery()] ERROR: " + std::string(PGSQL_ERROR)).c_str());
+-    return (void *)FALSE;
++    return (void *)false;
+   }
+ 
+   void * reaper(void * inv) {
+@@ -1324,9 +1323,9 @@
+ 	  scope.~HandleScope();
+ 	}
+ 	if (tmp < 0)
+-	  return JS_BOOL(FALSE);
++	  return JS_BOOL(false);
+ 	else
+-	  return JS_BOOL(TRUE);
++	  return JS_BOOL(true);
+   }
+ 
+   v8::Handle<v8::Value> handle_socket(v8::Local<v8::String> name, const v8::AccessorInfo& args) {
+@@ -1340,12 +1339,12 @@
+ 	  scope.~HandleScope();
+ 	}
+ 	if (ret == JS_INT(-1))
+-	  ret = JS_BOOL(FALSE);
++	  ret = JS_BOOL(false);
+ 	return ret;
+   }
+ 
+   v8::Handle<v8::Value> get_nonblocking(v8::Local<v8::String> name, const v8::AccessorInfo& args) {
+-	v8::Handle<v8::Value> ret = JS_BOOL(FALSE);
++	v8::Handle<v8::Value> ret = JS_BOOL(false);
+ 	{
+ 	  v8::HandleScope scope;
+ 	  PGSQL_PTR_CON;
+@@ -1416,7 +1415,7 @@
+ 	  return fetchrow->Call(args.This(), 1, fargs);
+ 	}
+ 	else
+-	  return JS_BOOL(FALSE);
++	  return JS_BOOL(false);
+   }
+ 
+ } /* end namespace */
+@@ -1444,8 +1443,10 @@
+   // Set handler for virtual "clientEncodingId" property:
+   ot->SetAccessor(pgsql::v8_str("clientEncodingId"),pgsql::get_client_encoding_id,pgsql::set_client_encoding_id);
+ 
++#if 0
+   // Set handler for virtual "clientEncoding" property:
+   ot->SetAccessor(pgsql::v8_str("clientEncoding"),pgsql::get_client_encoding,pgsql::set_client_encoding_id);
++#endif
+ 
+   /**
+    * Static property, useful for stats gathering
