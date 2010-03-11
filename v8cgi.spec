@@ -1,5 +1,7 @@
-# TODO:
-# - scons: *** Path for option v8_path does not exist: ../v8
+
+%define 	apxs		/usr/sbin/apxs
+
+%define		snap	20100309svn785
 %define		svnrev	785
 %define		rel		1
 Summary:	JavaScript Engine
@@ -17,7 +19,11 @@ Source0:	%{name}-%{svnrev}.tar.bz2
 # Source0-md5:	5578247aebd00b5c8a08b0c8b5e3459d
 Source1:	%{name}.conf
 BuildRequires:	fcgi-devel
+%if "%{pld_release}" == "ac"
+BuildRequires:	gcc >= 5:4.0
+%else
 BuildRequires:	gcc >= 6:4.0
+%endif
 BuildRequires:	libstdc++-devel
 BuildRequires:	scons
 BuildRequires:	v8-devel
@@ -28,6 +34,17 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 Small set of C++ and JS libraries, allowing coder to use JS as a
 server-side HTTP processing language. Basic functionality includes IO,
 GD, MySQL, Sockets, Templating, FastCGI and Apache module.
+
+%package -n apache-mod_v8cgi
+Summary:	Support for v8cgi within Apache
+Group:		Networking/Daemons/HTTP
+Requires:	apache(modules-api) = %apache_modules_api
+
+%description -n apache-mod_v8cgi
+Support for v8cgi within Apache.
+
+%define		_apacheconfdir	%(%{apxs} -q SYSCONFDIR 2>/dev/null)/conf.d
+%define		_pkglibdir	%(%{apxs} -q LIBEXECDIR 2>/dev/null)
 
 %prep
 %setup -q -n %{name}
@@ -54,13 +71,27 @@ export CFLAGS LDFLAGS CXXFLAGS CC CXX
 
 %install
 rm -rf $RPM_BUILD_ROOT
-install -d $RPM_BUILD_ROOT{%{_bindir},%{_libdir}/v8cgi,%{_sysconfdir}}
+install -d $RPM_BUILD_ROOT{%{_bindir},%{_libdir}/v8cgi,%{_sysconfdir},%{_apacheconfdir},%{_pkglibdir}}
 install -p v8cgi $RPM_BUILD_ROOT%{_bindir}/v8cgi
 cp -a %{SOURCE1} $RPM_BUILD_ROOT%{_sysconfdir}/v8cgi.conf
 install -p lib/* $RPM_BUILD_ROOT%{_libdir}/v8cgi
+install mod_v8cgi.so $RPM_BUILD_ROOT%{_pkglibdir}/
+
+echo 'LoadModule %{name}_module	modules/mod_%{name}.so
+AddHandler v8cgi-script .ssjs .sjs
+v8cgi_Config %{_sysconfdir}/v8cgi.conf' > \
+	$RPM_BUILD_ROOT%{_apacheconfdir}/90_mod_%{name}.conf
 
 %clean
 rm -rf $RPM_BUILD_ROOT
+
+%post -n apache-mod_v8cgi
+%service -q httpd restart
+
+%postun -n apache-mod_v8cgi
+if [ "$1" = "0" ]; then
+	%service -q httpd restart
+fi
 
 %files
 %defattr(644,root,root,755)
@@ -69,3 +100,8 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_libdir}/v8cgi
 %attr(755,root,root) %{_libdir}/v8cgi/*.so
 %{_libdir}/v8cgi/*.js
+
+%files -n apache-mod_v8cgi
+%defattr(644,root,root,755)
+%{_apacheconfdir}/90_mod_%{name}.conf
+%attr(755,root,root) %{_pkglibdir}/mod_v8cgi.so
