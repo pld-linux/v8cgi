@@ -18,17 +18,21 @@ URL:		http://code.google.com/p/v8cgi
 Source0:	%{name}-%{svnrev}.tar.bz2
 # Source0-md5:	5578247aebd00b5c8a08b0c8b5e3459d
 Source1:	%{name}.conf
-Patch0:	%{name}-pgsql.patch
+Patch0:		%{name}-pgsql.patch
+BuildRequires:	apache-devel >= 2.2
 BuildRequires:	fcgi-devel
 BuildRequires:	gcc >= 5:4.0
 BuildRequires:	libstdc++-devel
 BuildRequires:	postgresql-devel
+BuildRequires:	rpmbuild(macros) >= 1.268
 BuildRequires:	scons
 BuildRequires:	v8-devel
 ExclusiveArch:	%{ix86} %{x8664} arm
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define		apxs	/usr/sbin/apxs
+%define		_apacheconfdir	%(%{apxs} -q SYSCONFDIR 2>/dev/null)/conf.d
+%define		_pkglibdir	%(%{apxs} -q LIBEXECDIR 2>/dev/null)
 
 %description
 Small set of C++ and JS libraries, allowing coder to use JS as a
@@ -42,9 +46,6 @@ Requires:	apache(modules-api) = %apache_modules_api
 
 %description -n apache-mod_v8cgi
 Support for v8cgi within Apache.
-
-%define		_apacheconfdir	%(%{apxs} -q SYSCONFDIR 2>/dev/null)/conf.d
-%define		_pkglibdir	%(%{apxs} -q LIBEXECDIR 2>/dev/null)
 
 %prep
 %setup -q -n %{name}
@@ -107,5 +108,5 @@ fi
 
 %files -n apache-mod_v8cgi
 %defattr(644,root,root,755)
-%{_apacheconfdir}/90_mod_%{name}.conf
+%attr(640,root,root) %config(noreplace) %verify(not md5 mtime size) %{_apacheconfdir}/90_mod_%{name}.conf
 %attr(755,root,root) %{_pkglibdir}/mod_v8cgi.so
