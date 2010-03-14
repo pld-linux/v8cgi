@@ -1,5 +1,5 @@
-
-%define 	apxs		/usr/sbin/apxs
+# TODO:
+# - scons: *** Path for option v8_path does not exist: ../v8
 
 %define		snap	20100309svn785
 %define		svnrev	785
@@ -20,17 +20,15 @@ Source0:	%{name}-%{svnrev}.tar.bz2
 Source1:	%{name}.conf
 Patch0:	%{name}-pgsql.patch
 BuildRequires:	fcgi-devel
-%if "%{pld_release}" == "ac"
 BuildRequires:	gcc >= 5:4.0
-%else
-BuildRequires:	gcc >= 6:4.0
-%endif
 BuildRequires:	libstdc++-devel
 BuildRequires:	postgresql-devel
 BuildRequires:	scons
 BuildRequires:	v8-devel
 ExclusiveArch:	%{ix86} %{x8664} arm
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
+
+%define		apxs	/usr/sbin/apxs
 
 %description
 Small set of C++ and JS libraries, allowing coder to use JS as a
