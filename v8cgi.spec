@@ -23,6 +23,7 @@ BuildRequires:	apache-devel >= 2.2
 BuildRequires:	fcgi-devel
 BuildRequires:	gcc >= 5:4.0
 BuildRequires:	libstdc++-devel
+BuildRequires:	pkgconfig
 BuildRequires:	postgresql-devel
 BuildRequires:	rpmbuild(macros) >= 1.268
 BuildRequires:	scons
