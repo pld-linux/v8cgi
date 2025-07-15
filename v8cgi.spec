@@ -51,7 +51,7 @@ Support for v8cgi within Apache.
 %prep
 %setup -q -n %{name}
 %if "%{pld_release}" == "ac"
-%patch0 -p1
+%patch -P0 -p1
 %endif
 
 %build
